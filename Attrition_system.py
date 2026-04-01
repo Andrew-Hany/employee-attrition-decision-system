@@ -141,7 +141,7 @@ def get_attrition_drivers(row):
         "Work_Intensity": lambda r: r.get("Work_Intensity", 0) > 2,
 
         # --- Career ---
-        "Income_per_Level": lambda r: r.get("Income_per_Level", 1) < 1,
+        "Income_per_Level": lambda r: r.get("Income_per_Level", 1500) < 1100,
         "YearsSinceLastPromotion": lambda r: r.get("YearsSinceLastPromotion", 0) >= 3,
         "Stagnation": lambda r: r.get("YearsAtCompany", 0) >= 4 and r.get("JobLevel", 1) <= 2 and r.get("YearsSinceLastPromotion", 0) >= 2,
         "Company_Stability": lambda r: r.get("Company_Stability", 2) < 1,
