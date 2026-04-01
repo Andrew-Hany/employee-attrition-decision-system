@@ -547,13 +547,13 @@ with tab2:
 
         mermaid_code = f"""
 graph TD
-    Start[Start: Base Score = 0] --> Seniority[Seniority & Role]
+    Start([Start: Base Score = 0]) --> Seniority[Seniority & Role]
     
     Seniority {get_edge('JL', '+2 pts')} JL["Job Level >= 3"]
     Seniority {get_edge('TC', '+2 pts')} TC["Tenure >= 5y"]
     Seniority {get_edge('MT', '+1 pt')} MT["High Mgr tenure"]
     
-    JL {"==>" if 'JL' in score_details else "-->"} Perf[Performance]
+    JL {"==>" if 'JL' in score_details else "-->"} Perf{{Performance}}
     TC {"==>" if 'TC' in score_details else "-->"} Perf
     MT {"==>" if 'MT' in score_details else "-->"} Perf
     Seniority --> Perf
@@ -564,7 +564,7 @@ graph TD
     Perf {get_edge('IE', '+1 pt')} IE["Income per Level (> 3000)"]
     Perf {get_edge('PV', '+1 pt')} PV["Promotion Velocity (> 2.5)"]
     
-    PR3 {"==>" if 'PR3' in score_details else "-->"} Status[Status Factors]
+    PR3 {"==>" if 'PR3' in score_details else "-->"} Status{{Status Factors}}
     PR4 {"==>" if 'PR4' in score_details else "-->"} Status
     JI {"==>" if 'JI' in score_details else "-->"} Status
     IE {"==>" if 'IE' in score_details else "-->"} Status
@@ -582,10 +582,10 @@ graph TD
     
     Score["Final Score = {res['value_score']:.1f}"]
     
-    Score {hv_arrow} HV(High Value Employee)
-    Score {v_arrow} V(Valuable Employee)
-    Score {a_arrow} A(Average Employee)
-    Score {lv_arrow} LV(Low Value Employee)
+    Score {hv_arrow} HV([High Value Employee])
+    Score {v_arrow} V([Valuable Employee])
+    Score {a_arrow} A([Average Employee])
+    Score {lv_arrow} LV([Low Value Employee])
     
 {style_section}
 """
@@ -632,27 +632,43 @@ graph TD
 
         generic_mermaid = """
 graph TD
-    Start[Start: Base Score = 0] --> Seniority[Seniority & Role]
-    Seniority -->|+2: Job Level >= 3| Perf[Performance]
-    Seniority -->|+2: Tenure >= 5y| Perf
-    Seniority -->|+1: High Manager Tenure| Perf
+    Start([Start: Base Score = 0]) --> Seniority[Seniority & Role]
     
-    Perf -->|"+1: Rating == 3"| Status[Status Factors]
-    Perf -->|"+2: Rating >= 4"| Status
-    Perf -->|"+1: Involvement >= 3"| Status
-    Perf -->|"+1: Income per Level > 3000"| Status
-    Perf -->|"+1: Promotion Velocity > 2.5"| Status
+    Seniority --> JL["+2: Job Level >= 3"]
+    Seniority --> TC["+2: Tenure >= 5y"]
+    Seniority --> MT["+1: High Mgr Tenure"]
     
-    Status -->|-2: Tenure < 2y| Risk[Risk Factors]
-    Status -->|-1: Job Hopping| Risk
-    Status -->|-1: Low Satisfaction| Risk
+    JL --> Perf{Performance}
+    TC --> Perf
+    MT --> Perf
+    Seniority --> Perf
     
-    Risk --> Score[Final Score Calculation]
+    Perf --> PR3["+1: Rating == 3"]
+    Perf --> PR4["+2: Rating >= 4"]
+    Perf --> JI["+1: Involvement >= 3"]
+    Perf --> IE["+1: Income per Level > 3000"]
+    Perf --> PV["+1: Promotion Velocity > 2.5"]
     
-    Score -->|>= 5| HV[High Value Employee]
-    Score -->|>= 2| V[Valuable Employee]
-    Score -->|>= 0| A[Average Employee]
-    Score -->|< 0| LV[Low Value Employee]
+    PR3 --> Status{Status Factors}
+    PR4 --> Status
+    JI --> Status
+    IE --> Status
+    PV --> Status
+    Perf --> Status
+    
+    Status --> ST["-2: Tenure < 2y"]
+    Status --> JH["-1: Job Hopping (5+)"]
+    Status --> LS["-1: Low Satisfaction (<= 2)"]
+    
+    ST --> Score[Final Score Calculation]
+    JH --> Score
+    LS --> Score
+    Status --> Score
+    
+    Score --> HV([High Value Employee])
+    Score --> V([Valuable Employee])
+    Score --> A([Average Employee])
+    Score --> LV([Low Value Employee])
     
     style HV fill:#fef3c7,stroke:#fbbf24,stroke-width:2px
     style V fill:#dbeafe,stroke:#60a5fa,stroke-width:2px
