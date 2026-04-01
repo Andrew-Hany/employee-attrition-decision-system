@@ -483,17 +483,19 @@ with tab2:
         res = st.session_state.strategic_analysis
         row = res['X_row']
         
-        # Re-calculate points to identify specific path
+        # Re-calculate points to identify specific path (Synced with Attrition_system logic)
         score_details = []
-        if row['JobLevel'] >= 3: score_details.append("JL")
-        if row['YearsAtCompany'] >= 5: score_details.append("TC")
-        if row['Income_per_Level'] > 1: score_details.append("IE")
-        if row['YearsWithCurrManager'] >= 3: score_details.append("MT")
-        if row['PerformanceRating'] >= 4: score_details.append("PR")
-        if row['JobInvolvement'] >= 3: score_details.append("JI")
-        if row['YearsAtCompany'] < 2: score_details.append("ST")
-        if row['NumCompaniesWorked'] >= 5: score_details.append("JH")
-        if row['JobSatisfaction'] <= 2: score_details.append("LS")
+        if row.get('JobLevel', 0) >= 3: score_details.append("JL")
+        if row.get('YearsAtCompany', 0) >= 5: score_details.append("TC")
+        if row.get('Income_per_Level', 0) > 3000: score_details.append("IE")
+        if row.get('YearsWithCurrManager', 0) >= 3: score_details.append("MT")
+        if row.get('Years_per_Promotion', 0) > 2.5: score_details.append("PV")
+        if row.get('PerformanceRating', 0) == 3: score_details.append("PR3")
+        if row.get('PerformanceRating', 0) >= 4: score_details.append("PR4")
+        if row.get('JobInvolvement', 0) >= 3: score_details.append("JI")
+        if row.get('YearsAtCompany', 0) < 2: score_details.append("ST")
+        if row.get('NumCompaniesWorked', 0) >= 5: score_details.append("JH")
+        if row.get('JobSatisfaction', 0) <= 2: score_details.append("LS")
         
         target_tier = {
             "High Value Employee": "HV",
@@ -520,7 +522,7 @@ with tab2:
         
         # Build style lines only if applicable
         style_lines = []
-        for key, node_id in [("JL", "JL"), ("TC", "TC"), ("MT", "MT"), ("PR", "PR"), ("JI", "JI"), ("IE", "IE"), ("ST", "ST"), ("JH", "JH"), ("LS", "LS")]:
+        for key, node_id in [("JL", "JL"), ("TC", "TC"), ("MT", "MT"), ("PR3", "PR3"), ("PR4", "PR4"), ("JI", "JI"), ("IE", "IE"), ("PV", "PV"), ("ST", "ST"), ("JH", "JH"), ("LS", "LS")]:
             if key in score_details:
                 style_lines.append(f"    style {node_id} {hl_style}")
         
@@ -545,29 +547,33 @@ with tab2:
 
         mermaid_code = f"""
 graph TD
-    Start([Start: Base Score = 0]) --> Seniority{{Seniority & Role}}
+    Start[Start: Base Score = 0] --> Seniority[Seniority & Role]
     
     Seniority {get_edge('JL', '+2 pts')} JL["Job Level >= 3"]
     Seniority {get_edge('TC', '+2 pts')} TC["Tenure >= 5y"]
     Seniority {get_edge('MT', '+1 pt')} MT["High Mgr tenure"]
     
-    JL {"==>" if 'JL' in score_details else "-->"} Perf{{Performance}}
+    JL {"==>" if 'JL' in score_details else "-->"} Perf[Performance]
     TC {"==>" if 'TC' in score_details else "-->"} Perf
     MT {"==>" if 'MT' in score_details else "-->"} Perf
     Seniority --> Perf
     
-    Perf {get_edge('PR', '+2 pts')} PR["Rating >= 4"]
-    Perf {get_edge('JI', '+1 pt')} JI["High Involvement"]
-    Perf {get_edge('IE', '+1 pt')} IE["Income Efficiency"]
+    Perf {get_edge('PR3', '+1 pt')} PR3["Rating == 3"]
+    Perf {get_edge('PR4', '+2 pts')} PR4["Rating >= 4"]
+    Perf {get_edge('JI', '+1 pt')} JI["High Involvement (>= 3)"]
+    Perf {get_edge('IE', '+1 pt')} IE["Income per Level (> 3000)"]
+    Perf {get_edge('PV', '+1 pt')} PV["Promotion Velocity (> 2.5)"]
     
-    PR {"==>" if 'PR' in score_details else "-->"} Status{{Status Factors}}
+    PR3 {"==>" if 'PR3' in score_details else "-->"} Status[Status Factors]
+    PR4 {"==>" if 'PR4' in score_details else "-->"} Status
     JI {"==>" if 'JI' in score_details else "-->"} Status
     IE {"==>" if 'IE' in score_details else "-->"} Status
+    PV {"==>" if 'PV' in score_details else "-->"} Status
     Perf --> Status
     
     Status {get_edge('ST', '-2 pts')} ST["Short Tenure (< 2y)"]
     Status {get_edge('JH', '-1 pt')} JH["Job Hopping (5+)"]
-    Status {get_edge('LS', '-1 pt')} LS["Low Job Sat (<= 2)"]
+    Status {get_edge('LS', '-1 pt')} LS["Low Satisfaction (<= 2)"]
     
     ST {"==>" if 'ST' in score_details else "-->"} Score
     JH {"==>" if 'JH' in score_details else "-->"} Score
@@ -626,16 +632,18 @@ graph TD
 
         generic_mermaid = """
 graph TD
-    Start([Start: Base Score = 0]) --> Seniority{Seniority & Role}
-    Seniority -->|+2: Job Level >= 3| Perf{Performance}
+    Start[Start: Base Score = 0] --> Seniority[Seniority & Role]
+    Seniority -->|+2: Job Level >= 3| Perf[Performance]
     Seniority -->|+2: Tenure >= 5y| Perf
     Seniority -->|+1: High Manager Tenure| Perf
     
-    Perf -->|+2: Rating >= 4| Status{Status Factors}
-    Perf -->|+1: High Involvement| Status
-    Perf -->|+1: Income Efficiency| Status
+    Perf -->|"+1: Rating == 3"| Status[Status Factors]
+    Perf -->|"+2: Rating >= 4"| Status
+    Perf -->|"+1: Involvement >= 3"| Status
+    Perf -->|"+1: Income per Level > 3000"| Status
+    Perf -->|"+1: Promotion Velocity > 2.5"| Status
     
-    Status -->|-2: Tenure < 2y| Risk{Risk Factors}
+    Status -->|-2: Tenure < 2y| Risk[Risk Factors]
     Status -->|-1: Job Hopping| Risk
     Status -->|-1: Low Satisfaction| Risk
     
@@ -672,8 +680,10 @@ graph TD
             <ul style="color: #065f46; line-height: 1.6;">
                 <li><b>Job Level (>= 3):</b> +2 pts (Senior Leadership Impact)</li>
                 <li><b>Tenure (>= 5 years):</b> +2 pts (Deep Institutional Knowledge)</li>
-                <li><b>High Performance (Rating >= 4):</b> +2 pts (Exceptional Output)</li>
-                <li><b>Income Efficiency (> 1.0):</b> +1 pt (High Salary/Level Ratio)</li>
+                <li><b>Performance (Rating == 3):</b> +1 pt (Excellent Core Output)</li>
+                <li><b>Performance (Rating >= 4):</b> +2 pts (Outstanding Achievement)</li>
+                <li><b>Income per Level (> 3000):</b> +1 pt (High salary efficiency | Normalized by Job Level)</li>
+                <li><b>Promotion Velocity (> 2.5):</b> +1 pt (Loyalty & Growth Momentum)</li>
                 <li><b>Manager Relationship (>= 3y):</b> +1 pt (Team Stability)</li>
                 <li><b>Job Involvement (>= 3):</b> +1 pt (Strong Active Engagement)</li>
             </ul>
