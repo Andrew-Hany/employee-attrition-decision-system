@@ -607,26 +607,26 @@ graph TD
     st.markdown("""
     <div style="background-color: #f1f5f9; padding: 2rem; border-radius: 12px; border: 1px solid #e2e8f0;">
         <h3 style="text-align: center; color: #334155; margin-bottom: 2rem;">🏆 Final Value Tiers</h3>
-        <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 1rem;">
-            <div style="background-color: #fef3c7; border: 2px solid #fbbf24; padding: 1rem; border-radius: 12px; width: 22%; text-align: center;">
+        <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="background-color: #fef3c7; border: 2px solid #fbbf24; padding: 1rem; border-radius: 12px; flex: 1; min-width: 200px; text-align: center;">
                 <div style="font-size: 2rem;">⭐</div>
                 <h4 style="color: #92400e; margin: 0.5rem 0;">High Value</h4>
                 <p style="font-weight: 700; color: #b45309; font-size: 1.2rem;">Score >= 5</p>
                 <p style="font-size: 0.8rem; color: #d97706;">Mission-critical talent, key leadership.</p>
             </div>
-            <div style="background-color: #dbeafe; border: 2px solid #60a5fa; padding: 1rem; border-radius: 12px; width: 22%; text-align: center;">
+            <div style="background-color: #dbeafe; border: 2px solid #60a5fa; padding: 1rem; border-radius: 12px; flex: 1; min-width: 200px; text-align: center;">
                 <div style="font-size: 2rem;">💎</div>
                 <h4 style="color: #1e40af; margin: 0.5rem 0;">Valuable</h4>
                 <p style="font-weight: 700; color: #1d4ed8; font-size: 1.2rem;">Score >= 2</p>
                 <p style="font-size: 0.8rem; color: #2563eb;">Stable core talent, high potential.</p>
             </div>
-            <div style="background-color: #f1f5f9; border: 2px solid #94a3b8; padding: 1rem; border-radius: 12px; width: 22%; text-align: center;">
+            <div style="background-color: #f1f5f9; border: 2px solid #94a3b8; padding: 1rem; border-radius: 12px; flex: 1; min-width: 200px; text-align: center;">
                 <div style="font-size: 2rem;">👤</div>
                 <h4 style="color: #475569; margin: 0.5rem 0;">Average</h4>
                 <p style="font-weight: 700; color: #64748b; font-size: 1.2rem;">Score >= 0</p>
                 <p style="font-size: 0.8rem; color: #475569;">Solid contributors, standard performance.</p>
             </div>
-            <div style="background-color: #fee2e2; border: 2px solid #f87171; padding: 1rem; border-radius: 12px; width: 22%; text-align: center;">
+            <div style="background-color: #fee2e2; border: 2px solid #f87171; padding: 1rem; border-radius: 12px; flex: 1; min-width: 200px; text-align: center;">
                 <div style="font-size: 2rem;">⚠️</div>
                 <h4 style="color: #991b1b; margin: 0.5rem 0;">Low Value</h4>
                 <p style="font-weight: 700; color: #b91c1c; font-size: 1.2rem;">Score < 0</p>
