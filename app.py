@@ -3,7 +3,21 @@ import pandas as pd
 import numpy as np
 import os
 import random
-from Attrition_system import load_model, sample_employee, classify_employee_value, recommend_actions, preprocess_input, get_attrition_drivers
+import sys
+import importlib
+
+# Defensive import to handle Streamlit module-reloading KeyError
+if 'Attrition_system' in sys.modules:
+    importlib.reload(sys.modules['Attrition_system'])
+import Attrition_system as asy
+
+# Extract functions for easier access
+load_model = asy.load_model
+sample_employee = asy.sample_employee
+classify_employee_value = asy.classify_employee_value
+recommend_actions = asy.recommend_actions
+preprocess_input = asy.preprocess_input
+get_attrition_drivers = asy.get_attrition_drivers
 
 # --- Configuration & Styling ---
 st.set_page_config(page_title="HR Attrition Decision Support", page_icon="🛡️", layout="wide")
@@ -26,15 +40,17 @@ st.markdown("""
     }
     
     .section-header {
-        background-color: #f8fafc;
-        padding: 6px;
-        border-radius: 12px;
-        text-align: center;
-        font-weight: 700;
-        font-size: 13px;
+        background: linear-gradient(90deg, #f8fafc 0%, #eff6ff 100%);
+        padding: 4px 12px;
+        border-radius: 6px;
+        text-align: left;
+        font-weight: 800;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         color: #475569;
-        margin: 8px 0 5px 0;
-        border: 1px solid #e2e8f0;
+        margin: 6px 0 4px 0;
+        border-left: 3px solid #3b82f6;
     }
 
     .risk-score {
@@ -184,6 +200,18 @@ with tab1:
         
         # 1. Persona Profile (Left Card)
         ins = res['insights']
+        
+        # Ultra-compact modern High-fidelity layout
+        def metric_card(label, value, icon=""):
+            return f"""
+            <div style="background-color: white; border: 1px solid #f1f5f9; border-radius: 8px; padding: 6px 10px; margin-bottom: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); height: 100%; border-left: 2px solid #3b82f611;">
+                <div style="font-size: 9px; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 0px; letter-spacing: 0.01em;">{label}</div>
+                <div style="font-size: 13px; color: #1e3a8a; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 14px;">{icon}</span> {value}
+                </div>
+            </div>
+            """
+
         with col1:
             with st.container(border=True):
                 # Value-based styling
@@ -206,42 +234,79 @@ with tab1:
                 """, unsafe_allow_html=True)
                 
                 st.markdown('<div class="section-header">📋 Demographics & Personal Details</div>', unsafe_allow_html=True)
-                d_col1, d_col2, d_col3 = st.columns(3)
-                d_col1.write(f"**👤 Age:** {raw['Age']}")
-                d_col1.write(f"**💍 Marital:** {raw['MaritalStatus']}")
-                d_col2.write(f"**🎓 Education:** {raw['EducationField']}")
-                d_col2.write(f"**🏠 Commute:** {raw['DistanceFromHome']} mi")
-                d_col3.write(f"**✈️ Travel:** {raw['BusinessTravel'].replace('Travel_', '').replace('_', ' ')}")
-                d_col3.write(f"**📊 Stock Op:** {raw.get('StockOptionLevel', 0)}")
+                d_row1_col1, d_row1_col2, d_row1_col3 = st.columns(3)
+                d_row1_col1.markdown(metric_card("Employee ID", f"#{raw.get('EmployeeNumber', 'N/A')}", "🆔"), unsafe_allow_html=True)
+                d_row1_col2.markdown(metric_card("Age / Sex", f"{raw['Age']} ({raw.get('Gender', '?')[0]})", "👤"), unsafe_allow_html=True)
+                d_row1_col3.markdown(metric_card("Marital Status", raw['MaritalStatus'], "💍"), unsafe_allow_html=True)
                 
-                st.markdown('<div class="section-header">🏢 Career & Compensation History</div>', unsafe_allow_html=True)
-                c_col1, c_col2, c_col3 = st.columns(3)
-                c_col1.write(f"**💰 Salary:** ${raw['MonthlyIncome']:,}")
-                c_col1.write(f"**⏰ Overtime:** {'🚨 Yes' if raw['OverTime'] == 'Yes' else 'No'}")
+                d_row2_col1, d_row2_col2, d_row2_col3 = st.columns(3)
+                d_row2_col1.markdown(metric_card("Commute Dist.", f"{raw['DistanceFromHome']} mi", "🏠"), unsafe_allow_html=True)
+                d_row2_col2.markdown(metric_card("Business Travel", raw['BusinessTravel'].replace('Travel_', '').replace('_', ' '), "✈️"), unsafe_allow_html=True)
+                d_row2_col3.markdown(metric_card("Stock Options", raw.get('StockOptionLevel', 0), "📊"), unsafe_allow_html=True)
                 
-                c_col2.write(f"**🏗️ Job Lvl:** {raw['JobLevel']}")
-                c_col2.write(f"**🤝 Manager:** {raw['YearsWithCurrManager']}y")
+                st.markdown('<div class="section-header">🏢 Career & Progress History</div>', unsafe_allow_html=True)
+                c_row1_col1, c_row1_col2, c_row1_col3 = st.columns(3)
+                c_row1_col1.markdown(metric_card("Monthly Salary", f"${raw['MonthlyIncome']:,}", "💰"), unsafe_allow_html=True)
+                c_row1_col2.markdown(metric_card("Career Total", f"{raw.get('TotalWorkingYears', 0)}y", "📈"), unsafe_allow_html=True)
+                c_row1_col3.markdown(metric_card("Latest Hike", f"{raw.get('PercentSalaryHike', 0)}%", "💹"), unsafe_allow_html=True)
                 
-                c_col3.write(f"**🏢 Tenure:** {raw['YearsAtCompany']}y")
-                c_col3.write(f"**🏢 Prev Cos:** {raw['NumCompaniesWorked']}")
+                c_row2_col1, c_row2_col2, c_row2_col3 = st.columns(3)
+                c_row2_col1.markdown(metric_card("Job Level", raw['JobLevel'], "🏗️"), unsafe_allow_html=True)
+                c_row2_col2.markdown(metric_card("Last Promotion", f"{raw.get('YearsSinceLastPromotion', 0)}y ago", "⌛"), unsafe_allow_html=True)
+                c_row2_col3.markdown(metric_card("Rating", f"{raw.get('PerformanceRating', 0)}/4", "🏆"), unsafe_allow_html=True)
                 
-                st.divider()
+                c_row3_col1, c_row3_col2, c_row3_col3 = st.columns(3)
+                c_row3_col1.markdown(metric_card("Co. Tenure", f"{raw['YearsAtCompany']}y", "🏢"), unsafe_allow_html=True)
+                c_row3_col2.markdown(metric_card("Overtime", '🚨 YES' if raw['OverTime'] == 'Yes' else 'No', "⏰"), unsafe_allow_html=True)
+                c_row3_col3.markdown(metric_card("External Hist.", f"{raw['NumCompaniesWorked']} Cos.", "🏢"), unsafe_allow_html=True)
+
+                st.markdown('<div class="section-header">🧠 Sentiment & Satisfaction Audit</div>', unsafe_allow_html=True)
+                
+                def sat_meta(v):
+                    meta = {
+                        1: ("🔴", "Low"),
+                        2: ("🟠", "Med."),
+                        3: ("🟡", "High"),
+                        4: ("🟢", "V. High")
+                    }.get(v, ("⚪", "N/A"))
+                    return meta
+                
+                j_ico, j_lbl = sat_meta(raw.get('JobSatisfaction', 0))
+                e_ico, e_lbl = sat_meta(raw.get('EnvironmentSatisfaction', 0))
+                r_ico, r_lbl = sat_meta(raw.get('RelationshipSatisfaction', 0))
+                m_tenure = raw.get('YearsWithCurrManager', 0)
+                m_ico = "🟢" if m_tenure >= 3 else "🟡" if m_tenure >= 1 else "🔴"
+                
+                s_col1, s_col2, s_col3, s_col4 = st.columns(4)
+                s_col1.markdown(metric_card("Job", j_lbl, j_ico), unsafe_allow_html=True)
+                s_col2.markdown(metric_card("Env.", e_lbl, e_ico), unsafe_allow_html=True)
+                s_col3.markdown(metric_card("Team", r_lbl, r_ico), unsafe_allow_html=True)
+                s_col4.markdown(metric_card("Mgr.", f"{m_tenure}y", m_ico), unsafe_allow_html=True)
+                
+                st.markdown("""
+                    <div style="background-color: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 5px;">
+                        <p style="font-size: 11px; color: #94a3b8; margin: 0;"><b>Job Sat.:</b> Specific role contentment | <b>Env. Qual.:</b> Workspace culture and safety</p>
+                        <p style="font-size: 11px; color: #94a3b8; margin: 0;"><b>Team Rel.:</b> Peer collaboration quality | <b>Mgr. Tenure:</b> Stability under direct leadership</p>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("<div style='height:2px;'></div>", unsafe_allow_html=True)
                 
                 st.markdown('<div class="section-header">💡 Strategic Perspective Insights</div>', unsafe_allow_html=True)
                 m_col1, m_col2, m_col3 = st.columns(3)
                 
-                def styled_metric(label, value):
-                    font_size = "18px" if len(value) <= 10 else "14px"
-                    return f"""
-                    <div style="text-align: center;">
-                        <p style="font-size: 14px; color: #64748b; margin-bottom: 0;">{label}</p>
-                        <p style="font-size: {font_size}; font-weight: 700; margin-top: 0;">{value}</p>
-                    </div>
-                    """
+                m_col1.markdown(metric_card("Intensity", ins["Work Intensity"], "🔥"), unsafe_allow_html=True)
+                m_col2.markdown(metric_card("Income Status", ins["Income Alignment"], "⚖️"), unsafe_allow_html=True)
+                m_col3.markdown(metric_card("Stability", ins["Career Stability"], "🛡️"), unsafe_allow_html=True)
 
-                m_col1.markdown(styled_metric("Intensity", ins["Work Intensity"]), unsafe_allow_html=True)
-                m_col2.markdown(styled_metric("Income Status", ins["Income Alignment"]), unsafe_allow_html=True)
-                m_col3.markdown(styled_metric("Stability", ins["Career Stability"]), unsafe_allow_html=True)
+                st.markdown("""
+                    <div style="background-color: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 5px;">
+                        <p style="font-size: 11px; color: #94a3b8; margin: 0;"><b>Intensity:</b> Workload stress vs life balance | <b>Income Status:</b> Salary vs role expectations</p>
+                        <p style="font-size: 11px; color: #94a3b8; margin: 0;"><b>Stability:</b> Overall career tenure pattern and retention likelihood</p>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
 
         # 2. Risk Dynamics (Right)
         with col2:
@@ -264,12 +329,13 @@ with tab1:
                 
                 # Precision Audit
                 audit_col1, audit_col2, audit_col3 = st.columns(3)
-                audit_col1.markdown(styled_metric("Forecast", res['prediction']), unsafe_allow_html=True)
-                audit_col2.markdown(styled_metric("Reality", res['actual']), unsafe_allow_html=True)
+                audit_col1.markdown(metric_card("Forecast", res['prediction'], "🔮"), unsafe_allow_html=True)
+                audit_col2.markdown(metric_card("Reality", res['actual'], "👁️"), unsafe_allow_html=True)
                 
                 is_correct = res['prediction'] == res['actual']
-                match_label = "✅ Correct" if is_correct else "❌ Incorrect"
-                audit_col3.markdown(styled_metric("Audit", match_label), unsafe_allow_html=True)
+                match_label = "Correct" if is_correct else "Incorrect"
+                match_icon = "✅" if is_correct else "❌"
+                audit_col3.markdown(metric_card("Audit Result", match_label, match_icon), unsafe_allow_html=True)
             
                 st.divider()
 
@@ -339,40 +405,50 @@ with tab1:
         elif r < 0.25: risk_int = "LOW"
         elif r < 0.40: risk_int = "EMERGENT"
         elif r < 0.60: risk_int = "SIGNIFICANT"
-        elif r < 0.80: risk_int = "CRITICAL"
+        elif r < 0.85: risk_int = "HIGH RISK"
         else: risk_int = "SEVERE"
         
         # Strategic Guidance/Advice
         if r > threshold:
+            # Identify top dynamic mitigations
+            top_actions = [a.replace("⚠️ ", "").replace("✔️ ", "").replace("PRIORITY: ", "") for a in res['actions'][:2]]
+            action_summary = ", ".join(top_actions).lower() if top_actions else "engagement and feedback improvements"
+
             if "High Value" in res['value_label']:
-                advice = "<b>Mission-Critical Loss.</b> This employee's departure would cause significant disruption to intellectual capital. High-priority retention efforts required."
+                advice = f"<b>Mission-Critical Retention.</b> Irreplaceable expertise at risk. <b>Mitigate via:</b> {action_summary}, and personalized leadership support."
             elif "Valuable" in res['value_label']:
-                advice = "<b>High Priority Retention.</b> Significant stable asset at risk. Tactical adjustments to workload or compensation should be evaluated."
+                advice = f"<b>High Retention Priority.</b> Core stability asset at risk. <b>Mitigate via:</b> {action_summary}."
+            elif "Average" in res['value_label']:
+                advice = f"<b>General Mitigation.</b> Preventable risk detected. <b>Mitigate via:</b> {action_summary}."
             else:
-                advice = "<b>Standard Attrition Risk.</b> Focus on managing replacement costs and knowledge transfer processes."
+                advice = f"<b>Strategic Evaluation.</b> Low-impact profile at high risk. <b>Recommendation:</b> Assess if the cost of retention/intervention exceeds the impact of departure. Focus on standard exit documentation."
         else:
             if r < 0.10:
                 advice = "<b>Stable Engagement.</b> No attrition markers detected. Continue standard professional development rituals."
             else:
                 advice = "<b>Stable Retention Outlook.</b> Minimal risk profile. Routine management interactions are sufficient to maintain current state."
 
-        # Custom coloring for summary block
-        summary_bg = "#fef3c7" if (r > threshold and "High Value" in res['value_label']) else "#fdf2f8" if r > threshold else "#f0fdf4"
-        summary_border = "#fbbf24" if (r > threshold and "High Value" in res['value_label']) else "#db2777" if r > threshold else "#22c55e"
-
+        # Hardcoded styling for the Executive Summary (Always Red)
+        summary_bg = "#fef2f2"
+        summary_border = "#dc2626"
+        
+        # 3. Decision Narrative (Strategic Summary)
+        # Narrative scaling based on risk
+        risk_narrative = "driven primarily by" if r > threshold else "with minor signals observed in"
+        advice_html = f"<li><b>Strategic Guidance:</b> {advice}</li>" if advice else ""
+        
         st.markdown(f"""
         <div style="background-color: {summary_bg}; border-left: 5px solid {summary_border}; padding: 20px; border-radius: 8px;">
             <strong style="font-size: 18px;">Executive Summary:</strong><br>
             <div style="margin-top: 15px; font-size: 15px; color: #1e293b; line-height: 1.8;">
                 <ul style="padding-left: 20px; margin: 0;">
                     <li><b>Workforce Classification:</b> Identified as a <b>{res['value_label']}</b> (based on tenure, performance, and role level).</li>
-                    <li><b>Risk Assessment:</b> Detected a <b>{risk_int}</b> profile (<b>{r:.1%}</b> probability), driven primarily by <b>{risk_summary}</b>.</li>
-                    <li><b>Strategic Guidance:</b> {advice}</li>
+                    <li><b>Risk Assessment:</b> Detected a <b>{risk_int}</b> profile (<b>{r:.1%}</b> probability), {risk_narrative} <b>{risk_summary}</b>.</li>{advice_html}
                 </ul>
             </div>
         </div>
         """, unsafe_allow_html=True)
-        
+
         st.divider()
 
         # 4. Challenges vs. Actions (Side-by-Side)
@@ -384,12 +460,13 @@ with tab1:
                 st.markdown(f"- {p}")
 
         with col_actions:
-            st.subheader("🎯 Preservation Plan")
+            st.subheader("🎯 Retention Plan")
             for act in res['actions']:
                 if "PRIORITY" in act:
-                    st.markdown(f"<p class='priority-action' style='margin-bottom:12px;'>⚠️ {act}</p>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='background-color: #fffbeb; color: #b45309; padding: 6px 12px; border-radius: 6px; border: 1px solid #fde68a; font-weight: 700; font-size: 12px; display: inline-block; margin-bottom: 12px; border-left: 4px solid #f59e0b;'>⚠️ {act}</div>", unsafe_allow_html=True)
                 else:
                     st.success(f"✔️ {act}")
+
                     
     else:
         # Empty State
