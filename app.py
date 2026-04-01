@@ -280,7 +280,21 @@ with tab1:
                 main_pts = s_drivers.get("Main Drivers", ["No strong drivers"])
                 detailed = s_drivers.get("Detailed Drivers", [])
                 
-                if main_pts and main_pts[0] != "No strong drivers":
+                # Conditional display based on Prediction status
+                if res['prediction'] == "Stay":
+                    st.info("✅ **This employee is currently likely to stay.**")
+                    if main_pts and main_pts[0] != "No strong drivers":
+                        with st.expander("🔍 Potential Future Risks (Low Emphasis)"):
+                             st.caption("These are secondary signals that do not currently indicate a threat but may warrant long-term monitoring.")
+                             for pt in main_pts:
+                                 st.markdown(f"**{pt.upper()}**")
+                                 cat_upper = pt.upper()
+                                 matches = [d for d in detailed if f"[{cat_upper}]" in d.upper()]
+                                 for m in matches:
+                                     _, factor = m.split("] ", 1) if "] " in m else ("", m)
+                                     st.write(f"• {factor}")
+                
+                elif main_pts and main_pts[0] != "No strong drivers":
                     for pt in main_pts:
                         # Show Category Title (Red Badge)
                         st.markdown(f"""
