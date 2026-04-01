@@ -670,10 +670,23 @@ graph TD
     Score --> A([Average Employee])
     Score --> LV([Low Value Employee])
     
-    style HV fill:#fef3c7,stroke:#fbbf24,stroke-width:2px
-    style V fill:#dbeafe,stroke:#60a5fa,stroke-width:2px
-    style A fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px
-    style LV fill:#fee2e2,stroke:#f87171,stroke-width:2px
+    %% Design Styles
+    style Start fill:#f8fafc,stroke:#64748b,stroke-width:1px
+    style Seniority fill:#f8fafc,stroke:#64748b,stroke-width:1px
+    style Perf fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
+    style Status fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
+    style Score fill:#f8fafc,stroke:#64748b,stroke-width:1px
+    
+    classDef booster fill:#eff6ff,stroke:#3b82f6,stroke-width:1px,color:#1e40af;
+    class JL,TC,MT,PR3,PR4,JI,IE,PV booster
+    
+    classDef risk fill:#fff1f2,stroke:#f43f5e,stroke-width:1px,color:#9f1239;
+    class ST,JH,LS risk
+
+    style HV fill:#fef3c7,stroke:#fbbf24,stroke-width:3px
+    style V fill:#dbeafe,stroke:#60a5fa,stroke-width:3px
+    style A fill:#f1f5f9,stroke:#94a3b8,stroke-width:3px
+    style LV fill:#fee2e2,stroke:#f87171,stroke-width:3px
 """
         import streamlit.components.v1 as components
         html_code_gen = f"""
