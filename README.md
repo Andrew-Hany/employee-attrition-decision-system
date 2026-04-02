@@ -225,4 +225,4 @@ graph TD
 ---
 
 Developed by **Andrew Zaki**. 
-*Turning Workforce Data into Strategic Talent Retention.*
+
