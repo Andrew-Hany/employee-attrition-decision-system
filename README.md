@@ -10,48 +10,109 @@
 
 ---
 
-## 🗺️ System Architecture: The Big Picture
-We combine data-driven prediction with structured business logic to turn raw workforce insights into high-impact retention actions.
+---
 
+
+## 📊 Phase 1: Exploratory Data Analysis (EDA)
+Our initial discovery (detailed in [EDA.ipynb](EDA.ipynb)) revealed that attrition is driven by **four core strategic drivers**. By analyzing these sub-metrics, we can move from raw data to a strategic "Employee Value" classification.
+
+### **The Attrition Driver Tree**
+```mermaid
+graph LR
+    D[Attrition Drivers] --> W[Workload Stress]
+    D --> C[Seniority & Comp.]
+    D --> L[Life Stage Mobility]
+    D --> R[Role Design]
+    
+    W --> W1[Overtime]
+    W --> W2[Job Involvement]
+    
+    C --> C1[Job Level / Salary]
+    C --> C2[Income Efficiency]
+    C --> C3[Promotion Velocity]
+    
+    L --> L1[Age / Experience]
+    L --> L2[Marital Status]
+    L --> L3[Jump History]
+    
+    R --> R1[Travel Load]
+    R --> R2[Job Satisfaction]
+    R --> R3[Environment Fit]
+
+    style D fill:#f8fafc,stroke:#334155,stroke-width:2px
+    classDef pillar fill:#eff6ff,stroke:#3b82f6,stroke-width:1px;
+    class W,C,L,R pillar
+```
+
+### **Strategic Pillar Details**
+1.  **Workload:** Impact of overtime vs. role involvement.
+2.  **Seniority & Compensation:** Evaluation of salary competitiveness (Income Efficiency) and growth rate (Promotion Velocity).
+3.  **Life Stage:** Factors in external tenure stability and professional mobility.
+4.  **Role Structure:** Focuses on travel burden and environmental satisfaction.
+
+---
+
+
+## ⚙️ Phase 2: Model Training Pipeline
+The technical development of our predictive engine is detailed in [attrition_model.ipynb](attrition_model.ipynb). This stage focuses on transforming raw behavior features into a high-recall retention model.
+
+### **The Training Workflow**
 ```mermaid
 graph TD
-    subgraph "Strategic Drivers"
-        W[Workload Stress]
-        L[Life Stage Mobility]
-        S[Seniority & Compensation]
-        R[Role Structure]
-    end
-
-    subgraph "Training Pipeline (Back-End)"
-        D1[Raw HR Data] --> P1[Pre-processing]
+    subgraph "Training Lifecycle"
+        D1[Raw IBM HR Data] --> P1[Data Pre-processing]
         P1 --> F1[Feature Engineering]
-        F1 --> M1[Model Selection]
+        F1 --> M1[Model Selection & Tuning]
         M1 --> T1[Final Model Training]
     end
+    
+    style T1 fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+```
 
-    T1 -- "Deployed Model" --> P2
+### **Model Selection & Performance Results**
+We prioritized **Recall** (catching as many potential leavers as possible) while maintaining a balanced **Precision**. As shown below, **SMOTE (Oversampling)** was the key breakthrough in our modeling strategy.
 
-    subgraph "Inference Intelligence (Front-End)"
+| Experiment | Model | Threshold | Test ROC AUC | Recall (Leave) | Precision | F1-Score |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **I. Baseline** | **Logistic Regression** | 0.35 | **0.810** | 0.489 | **0.535** | **0.511** |
+| (No SMOTE) | CatBoost | 0.35 | 0.780 | 0.511 | 0.453 | 0.480 |
+| | Random Forest | 0.40 | 0.779 | 0.170 | 0.444 | 0.246 |
+| <hr> | <hr> | <hr> | <hr> | <hr> | <hr> | <hr> |
+| **II. SMOTE** | ✨ **Logistic Regression** | **0.40** | **0.789** | 🚀 **0.766** | 0.353 | **0.483** |
+| (Over-sampled) | Random Forest | 0.35 | 0.771 | 0.723 | 0.333 | 0.456 |
+| | CatBoost | 0.35 | 0.758 | 0.681 | 0.327 | 0.441 |
+
+> [!TIP]
+> **Key Insight:** Moving from Baseline to SMOTE increased our ability to catch leavers (Recall) from **48.9%** to **76.6%**, which is critical for a proactive retention strategy.
+
+### **Threshold Optimization**
+The system uses a **Logistic Regression** model optimized at a **0.35 - 0.40 threshold**.
+*   **Lower Threshold (0.35):** Maximizes Recall (Catching more potential leavers).
+*   **Selection:** We chose **0.40** for the baseline to achieve a **76.6% Recall rate**.
+
+---
+
+## 🎯 Phase 3: Inference Strategy (Intelligence Hub)
+The final system takes the trained model and wraps it in a **Human-Centric Intelligence Layer**. This hub transforms raw numerical predictions into a structured strategic narrative.
+
+### **The Inference Pipeline**
+```mermaid
+graph TD
+    subgraph "Live Strategy Engine"
         D2[New Employee Data] --> P2[Model Prediction]
         P2 --> S2[Employee Value Scoring]
         S2 --> R2[Risk Driver Identification]
-        R2 --> F2[Strategic Problem Framing]
+        R2 --> F2[Problem Framing]
+        F2 --> O([Retention Actions / Decisions])
     end
-
-    F2 --> O([Retention Actions / Decisions])
-
+    
     style O fill:#f0fdf4,stroke:#16a34a,stroke-width:3px
-    style S2 fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
-    style R2 fill:#fff1f2,stroke:#f43f5e,stroke-width:2px
 ```
 
 ---
 
-## 💎 1. Employee Value Scoring Logic
-Not all attrition is equal. Our system prioritizes retaining high-impact talent by scoring employees based on performance, growth velocity, and seniority.
-
-**Logic Transparency in Action:**
-![Classification Logic View](assets/classification_logic.png)
+### **1. Strategic Value Scoring Logic**
+The system prioritizes retention for high-impact talent by processing model outputs through our **Value Scoring Engine**.
 
 ```mermaid
 graph TD
@@ -83,15 +144,30 @@ graph TD
     Score --> V([Valuable Employee])
     Score --> A([Average Employee])
     Score --> LV([Low Value Employee])
+
+    %% Design Styles
+    style Start fill:#f8fafc,stroke:#64748b,stroke-width:1px
+    style Seniority fill:#f8fafc,stroke:#64748b,stroke-width:1px
+    style Perf fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
+    style Status fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
+    style Score fill:#f8fafc,stroke:#64748b,stroke-width:1px
     
-    style HV fill:#fef3c7,stroke:#fbbf24,stroke-width:2px
-    style LV fill:#fee2e2,stroke:#f87171,stroke-width:2px
+    classDef booster fill:#eff6ff,stroke:#3b82f6,stroke-width:1px,color:#1e40af;
+    class JL,TC,MT,PR3,PR4,JI,IE,PV booster
+    
+    classDef risk fill:#fff1f2,stroke:#f43f5e,stroke-width:1px,color:#9f1239;
+    class ST,JH,LS risk
+
+    style HV fill:#fef3c7,stroke:#fbbf24,stroke-width:3px
+    style V fill:#dbeafe,stroke:#60a5fa,stroke-width:3px
+    style A fill:#f1f5f9,stroke:#94a3b8,stroke-width:3px
+    style LV fill:#fee2e2,stroke:#f87171,stroke-width:3px
 ```
 
 ---
 
-## 🔍 2. Risk Identification & Problem Framing
-We translate raw employee features into clear business problems using a multi-stage intelligence pipeline.
+### **2. Risk Identification & Problem Framing**
+This layer translates complex feature correlations into clear, human-readable **Business Problem Frames**.
 
 ```mermaid
 graph TD
@@ -109,13 +185,13 @@ graph TD
     PF --> RA([Retention Actions / Decisions])
     
     style PF fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
-    style RA fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style RA fill:#f0fdf4,stroke:#16a34a,stroke-width:3px
 ```
 
 ---
 
-## 🎯 3. From Risk Drivers to Retention Actions
-The system maps identified strategic problems to specific, actionable HR interventions to ensure consistency and speed in retention efforts.
+### **3. Strategic Action Mapping**
+Identified problems are linked directly to targeted HR interventions to ensure immediate, data-backed response.
 
 ```mermaid
 graph TD
@@ -126,13 +202,10 @@ graph TD
     
     BR --> A1[Reduce Workload]
     BR --> A2[Improve Work-Life Balance]
-    
     CM --> A3[Review Compensation]
     CM --> A4[Define Promotion Path]
-    
     TR --> A5[Adjust Role Design]
     TR --> A6[Reduce Travel]
-    
     PR --> A7[Remote Work]
     PR --> A8[Relocation Support]
 
@@ -145,9 +218,9 @@ graph TD
 ---
 
 ## 🛠️ Technical Stack
-*   **Predictive Model:** Random Forest / Gradient Boosting (Trained on IBM HR Attrition).
-*   **Logic Engine:** Hierarchical thresholding and weighted value classification.
-*   **Interface:** Streamlit (Custom Executive UI) with real-time Mermaid.js visualizations.
+*   **Predictive Model:** **Logistic Regression (Optimized with SMOTE)** — Our winning architecture based on the highest Recall (76.6%) vs. Performance.
+*   **Logic Engine:** Hierarchical Strategic Value scoring and Rule-Based Problem Framing.
+*   **Interface:** Streamlit (Executive Strategic UI) with real-time Mermaid.js visualizations.
 
 ---
 
