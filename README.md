@@ -1,84 +1,155 @@
 # 🧠 HR Attrition Intelligence Hub
-
-### **Strategic Employee Retention & Decision Support System**
-
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_svg.svg)](https://employee-retention-ai.streamlit.app)
+### **Bridging Data Science with Structured Business Logic**
 
 ---
 
-## 📌 Executive Summary
-Most HR tools tell you *who* might leave. This system tells you **why** they are leaving and **exactly what to do about it.**
+## 📺 Live Demo: Attrition Decision Support System
+**Experience the live strategic dashboard here: [https://employee-retention-ai.streamlit.app/](https://employee-retention-ai.streamlit.app/)**
 
-By bridging Machine Learning (IBM HR Analytics) with a custom **Strategic Logic Layer**, this platform classifies workforce value, detects toxic risk combinations (like Burnout + Disengagement), and generates automated retention plans tailored to each employee’s unique profile.
+![Strategic Dashboard Demo](assets/dashboard_demo.png)
 
 ---
 
-## 🚀 Key Features
+## 🗺️ System Architecture: The Big Picture
+We combine data-driven prediction with structured business logic to turn raw workforce insights into high-impact retention actions.
 
-### 1. **Strategic Employee Value Classification**
-Beyond basic performance, the system uses a **weighted point-based algorithm** to categorize employees into four tiers:
-*   ⭐ **High Value:** Mission-critical talent with high seniority and growth velocity.
-*   💎 **Valuable:** Stable core contributors with high potential.
-*   👤 **Average:** Solid performers meeting standard expectations.
-*   ⚠️ **Low Value:** Disengaged or low-tier impact roles requiring strategic evaluation.
+```mermaid
+graph TD
+    subgraph "Strategic Drivers"
+        W[Workload Stress]
+        L[Life Stage Mobility]
+        S[Seniority & Compensation]
+        R[Role Structure]
+    end
 
-### 2. **Intelligent Risk Driver Engine**
-Developed using complex feature engineering, the system identifies **root causes** across four high-signal categories:
-*   **Workload:** Detects "Toxic Combos" (e.g., *High Overtime + Low Involvement*).
-*   **Seniority & Compensation:** Analyzes **Income Efficiency** (Salary normalized by Job Level) and **Promotion Velocity**.
-*   **Role Structure:** Monitors travel burden and role stability.
-*   **Life Stage:** Factors in age and external market mobility risk.
+    subgraph "Training Pipeline (Back-End)"
+        D1[Raw HR Data] --> P1[Pre-processing]
+        P1 --> F1[Feature Engineering]
+        F1 --> M1[Model Selection]
+        M1 --> T1[Final Model Training]
+    end
 
-### 3. **Personalized "Logic-on-Path" Visualization**
-Total transparency for HR leads. Every prediction is accompanied by a **dynamic Mermaid.js flowchart** that highlights the exact logical sequence used to classify that specific employee.
+    T1 -- "Deployed Model" --> P2
 
-### 4. **Actionable Strategic Guidance**
-Direct bridge from prediction to intervention. The system generates:
-*   **Problem Detection:** Clear "Human-Readable" labels (e.g., *Detected high intensity burnout paired with total disengagement*).
-*   **Retention Actions:** Specific, tiered commands (e.g., *Immediate re-engagement talk*, *Redistribute urgent tasks*).
+    subgraph "Inference Intelligence (Front-End)"
+        D2[New Employee Data] --> P2[Model Prediction]
+        P2 --> S2[Employee Value Scoring]
+        S2 --> R2[Risk Driver Identification]
+        R2 --> F2[Strategic Problem Framing]
+    end
+
+    F2 --> O([Retention Actions / Decisions])
+
+    style O fill:#f0fdf4,stroke:#16a34a,stroke-width:3px
+    style S2 fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
+    style R2 fill:#fff1f2,stroke:#f43f5e,stroke-width:2px
+```
+
+---
+
+## 💎 1. Employee Value Scoring Logic
+Not all attrition is equal. Our system prioritizes retaining high-impact talent by scoring employees based on performance, growth velocity, and seniority.
+
+**Logic Transparency in Action:**
+![Classification Logic View](assets/classification_logic.png)
+
+```mermaid
+graph TD
+    Start([Start: Base Score = 0]) --> Seniority[Seniority & Role]
+    
+    Seniority --> JL["+2: Job Level >= 3"]
+    Seniority --> TC["+2: Tenure >= 5y"]
+    Seniority --> MT["+1: High Mgr Tenure"]
+    
+    JL --> Perf{Performance}
+    TC --> Perf
+    MT --> Perf
+    
+    Perf --> PR3["+1: Rating == 3"]
+    Perf --> PR4["+2: Rating >= 4"]
+    Perf --> JI["+1: Involvement >= 3"]
+    Perf --> IE["+1: Income per Level > 3000"]
+    Perf --> PV["+1: Promotion Velocity > 2.5"]
+    
+    PR3 & PR4 & JI & IE & PV --> Status{Status Factors}
+    
+    Status --> ST["-2: Tenure < 2y"]
+    Status --> JH["-1: Job Hopping (5+)"]
+    Status --> LS["-1: Low Satisfaction (<= 2)"]
+    
+    ST & JH & LS --> Score[Final Score Calculation]
+    
+    Score --> HV([High Value Employee])
+    Score --> V([Valuable Employee])
+    Score --> A([Average Employee])
+    Score --> LV([Low Value Employee])
+    
+    style HV fill:#fef3c7,stroke:#fbbf24,stroke-width:2px
+    style LV fill:#fee2e2,stroke:#f87171,stroke-width:2px
+```
+
+---
+
+## 🔍 2. Risk Identification & Problem Framing
+We translate raw employee features into clear business problems using a multi-stage intelligence pipeline.
+
+```mermaid
+graph TD
+    A[Employee Features] --> B[Rule-Based Conditions]
+    B --> C[Triggered Signals]
+    C --> D{Driver Categories}
+    
+    D --> W[Workload Stress]
+    D --> Co[Seniority & Comp.]
+    D --> Ro[Role Structure]
+    D --> Li[Life Stage]
+    
+    W & Co & Ro & Li --> SD[Structured Drivers]
+    SD --> PF[Problem Framing]
+    PF --> RA([Retention Actions / Decisions])
+    
+    style PF fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
+    style RA fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+```
+
+---
+
+## 🎯 3. From Risk Drivers to Retention Actions
+The system maps identified strategic problems to specific, actionable HR interventions to ensure consistency and speed in retention efforts.
+
+```mermaid
+graph TD
+    PF[Problem Framing] --> BR[Burnout Risk]
+    PF --> CM[Career Misalignment]
+    PF --> TR[Travel Burden]
+    PF --> PR[Personal Mobility Risk]
+    
+    BR --> A1[Reduce Workload]
+    BR --> A2[Improve Work-Life Balance]
+    
+    CM --> A3[Review Compensation]
+    CM --> A4[Define Promotion Path]
+    
+    TR --> A5[Adjust Role Design]
+    TR --> A6[Reduce Travel]
+    
+    PR --> A7[Remote Work]
+    PR --> A8[Relocation Support]
+
+    classDef action fill:#f0fdf4,stroke:#16a34a,stroke-width:1px;
+    class A1,A2,A3,A4,A5,A6,A7,A8 action
+    classDef prob fill:#fff1f2,stroke:#f43f5e,stroke-width:1px;
+    class BR,CM,TR,PR prob
+```
 
 ---
 
 ## 🛠️ Technical Stack
-
-*   **Core Logic:** Python 3.x
-*   **Machine Learning:** Scikit-Learn (Random Forest/XGBoost logic)
-*   **Feature Engineering:** Custom normalization of salary-to-level ratios and growth velocity metrics.
-*   **Interface:** Streamlit (Custom CSS for premium Dashboard UI)
-*   **Visuals:** Mermaid.js (SVG logic trees)
-*   **Data Source:** IBM HR Analytics Attrition Dataset
+*   **Predictive Model:** Random Forest / Gradient Boosting (Trained on IBM HR Attrition).
+*   **Logic Engine:** Hierarchical thresholding and weighted value classification.
+*   **Interface:** Streamlit (Custom Executive UI) with real-time Mermaid.js visualizations.
 
 ---
 
-## 📦 Installation & Setup
-
-1. **Clone the repository:**
-```bash
-git clone https://github.com/Andrew-Hany/employee-attrition-decision-system.git
-cd employee-attrition-decision-system
-```
-
-2. **Install dependencies:**
-```bash
-pip install -r requirements.txt
-```
-
-3. **Run the Dashboard:**
-```bash
-streamlit run app.py
-```
-
----
-
-## 📊 Methodology: The "Value" Algorithm
-The system goes beyond raw 'Attrition %' by calculating a **Combined Value Score**:
-*   **Seniority (+2):** Job Level >= 3
-*   **Loyalty (+2):** Tenure >= 5 years
-*   **Growth (+1):** Promotion Velocity > 2.5 (Tenure / Promotion ratio)
-*   **Efficiency (+1):** Income per Level > 3000 (Normalized salary competitiveness)
-*   **Risk Adjustments:** Penalties for low tenure (< 2y) or high job-hopping history.
-
----
-
-## 🤝 Contact & Contribution
-Developed by **Andrew Hany**. Feel free to reach out for collaboration or strategic HR analytics consultations!
+Developed by **Andrew Hany**. 
+*Turning Workforce Data into Strategic Talent Retention.*
