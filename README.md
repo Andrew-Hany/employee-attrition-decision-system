@@ -1,5 +1,6 @@
 #  HR Attrition Intelligence Hub
-### **Bridging Data Science with Structured Business Logic**
+This project transforms attrition prediction into a **decision support system for HR strategy**.
+
 ##  Problem & Value
 
 Employee attrition is costly and difficult to manage proactively.
@@ -9,7 +10,7 @@ Most solutions stop at prediction — this system goes further by:
 - Prioritizing *who* to retain
 - Recommending *what actions* to take
 
-This project transforms attrition prediction into a **decision support system for HR strategy**.
+
 ---
 
 ##  Live Demo: Attrition Decision Support System
