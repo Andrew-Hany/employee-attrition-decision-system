@@ -1,17 +1,36 @@
-# 🧠 HR Attrition Intelligence Hub
+#  HR Attrition Intelligence Hub
 ### **Bridging Data Science with Structured Business Logic**
+##  Problem & Value
 
+Employee attrition is costly and difficult to manage proactively.
+
+Most solutions stop at prediction — this system goes further by:
+- Explaining *why* employees are at risk
+- Prioritizing *who* to retain
+- Recommending *what actions* to take
+
+This project transforms attrition prediction into a **decision support system for HR strategy**.
 ---
 
-## 📺 Live Demo: Attrition Decision Support System
+##  Live Demo: Attrition Decision Support System
 **Experience the live strategic dashboard here: [https://employee-retention-ai.streamlit.app/](https://employee-retention-ai.streamlit.app/)**
 
 ![Strategic Dashboard Demo](assets/dashboard_demo.png)
 
 ---
 
+
+## ⚡ Quick Start
+
+```bash
+git clone https://github.com/Andrew-Hany/employee-attrition-decision-system.git
+cd employee-attrition-decision-system
+pip install -r requirements.txt
+streamlit run app.py
+```
 ---
 
+---
 
 ## 📊 Phase 1: Exploratory Data Analysis (EDA)
 Our initial discovery (detailed in [EDA.ipynb](EDA.ipynb)) revealed that attrition is driven by **four core strategic drivers**. By analyzing these sub-metrics, we can move from raw data to a strategic "Employee Value" classification.
@@ -218,10 +237,20 @@ graph TD
 ---
 
 ## 🛠️ Technical Stack
-*   **Predictive Model:** **Logistic Regression (Optimized with SMOTE)** — Our winning architecture based on the highest Recall (76.6%) vs. Performance.
-*   **Logic Engine:** Hierarchical Strategic Value scoring and Rule-Based Problem Framing.
-*   **Interface:** Streamlit (Executive Strategic UI) with real-time Mermaid.js visualizations.
 
+- **Model:** Logistic Regression (optimized with SMOTE)
+- **Explainability Layer:** Rule-based driver identification
+- **Decision Engine:** Value scoring + problem framing
+- **Interface:** Streamlit
+- **Visualization:** Matplotlib, Seaborn, Mermaid
+
+## 📂 Project Structure
+
+- EDA.ipynb → Exploratory analysis
+- attrition_model.ipynb → Model training & evaluation
+- app.py → Streamlit application
+- utils/ → Logic (scoring, drivers, recommendations)
+- assets/ → Images & visuals
 ---
 
 Developed by **Andrew Zaki**. 
