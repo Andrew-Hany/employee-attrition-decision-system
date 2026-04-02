@@ -53,10 +53,14 @@ def classify_employee_value(row):
     
     if row['JobLevel'] >= 3: score += 2
     if row['YearsAtCompany'] >= 5: score += 2
-    if row['Income_per_Level'] > 1: score += 1
-    if row['YearsWithCurrManager'] >= 3: score += 1
+    if row.get('Income_per_Level', 1500) > 3000: score += 1
+    if row.get('YearsWithCurrManager', 0) >= 3: score += 1
     
-    if row['PerformanceRating'] >= 4: score += 2
+
+    if row.get('Years_per_Promotion', 1) > 2.5: score += 1
+    
+    if row.get('PerformanceRating', 3) == 3: score += 1
+    if row.get('PerformanceRating', 3) >= 4: score += 2
     if row['JobInvolvement'] >= 3: score += 1
     
     if row['YearsAtCompany'] < 2: score -= 2
@@ -188,7 +192,7 @@ def get_attrition_drivers(row):
                 score += 1
                 detailed_drivers.append(f"[{driver.upper()}] {EXPLANATIONS.get(feat, feat)}")
 
-                # 🔥 workload direction logic
+                
                 if driver == "Workload":
                     if feat == "JobInvolvement":
                         workload_low += 1
@@ -201,12 +205,14 @@ def get_attrition_drivers(row):
     sorted_drivers = sorted(driver_scores.items(), key=lambda x: x[1], reverse=True)
     main_drivers = [d[0] for d in sorted_drivers[:3]]
 
-    # 🔥 workload interpretation
+    # workload interpretation (Detecting toxic combinations)
     workload_type = None
-    if workload_high > workload_low:
-        workload_type = "High workload (burnout risk)"
+    if workload_high > 0 and workload_low > 0:
+        workload_type = "Severe: Burnout with Disengagement"
+    elif workload_high > workload_low:
+        workload_type = "High Intensity (Burnout risk)"
     elif workload_low > workload_high:
-        workload_type = "Low engagement (underutilization)"
+        workload_type = "Low Engagement (Underutilization)"
 
     return {
         "Main Drivers": main_drivers if main_drivers else ["No strong drivers"],
@@ -228,12 +234,16 @@ def recommend_actions(row, risk, value_label, drivers, threshold=0.35):
     problems = []
     actions = []
 
-    # --- Workload (smart split) ---
+    # --- Workload ---
     if "Workload" in main:
-        if workload_type == "High workload (burnout risk)":
+        if workload_type == "Severe: Burnout with Disengagement":
+            problems.append("CRITICAL: Detected high intensity burnout paired with total disengagement.")
+            actions.append("Immediate re-engagement talk and redistribute urgent tasks")
+            actions.append("Reduce intensity and reassess role fit")
+        elif workload_type == "High Intensity (Burnout risk)":
             problems.append("Attrition driven by high workload and burnout risk.")
             actions.append("Reduce workload and improve work-life balance")
-        elif workload_type == "Low engagement (underutilization)":
+        elif workload_type == "Low Engagement (Underutilization)":
             problems.append("Detected low engagement indicating role underutilization.")
             actions.append("Increase responsibility and role engagement")
 
@@ -298,22 +308,3 @@ def attrition_system(model, df, threshold=0.35, want_leave=None, value_type=None
         "Problems": recs["Problems"],
         "Actions": recs["Actions"]
     }
-
-
-# # --- Run ---
-# if __name__ == "__main__":
-    
-#     model = load_model()
-#     df = pd.read_csv('WA_Fn-UseC_-HR-Employee-Attrition.csv')
-    
-#     result = attrition_system(
-#         model,
-#         df,
-#         threshold=0.35, 
-#         want_leave=None, 
-#         value_type=None, 
-#         min_risk=None, 
-#         max_risk=None
-#     )
-    
-#     print(result)
